@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: myapp
+    env: java
+    buildCommand: "./build.sh"
+    startCommand: "./start.sh"
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: myapp-db
+          property: connectionString
+    autoDeploy: false
+
+databases:
+  - name: myapp-db
+    databaseName: myappdb
+    user: myappuser
