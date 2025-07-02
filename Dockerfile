@@ -1,5 +1,5 @@
 # Multi-stage build for Render.com Docker deployment
-FROM maven:3.9-openjdk-17-slim AS build
+FROM maven:3.9.4-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=build /app/target/myApp-0.0.1-SNAPSHOT.jar app.jar
 
 # Create a non-root user for security
-RUN addgroup --system spring && adduser --system spring --ingroup spring
+RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
 # Expose the port
