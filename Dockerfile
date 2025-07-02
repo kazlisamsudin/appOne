@@ -1,5 +1,5 @@
 # Multi-stage build for Render.com Docker deployment
-FROM maven:3.8.6-openjdk-17-slim AS build
+FROM maven:3.9.6-openjdk-17-slim AS build
 
 WORKDIR /app
 
