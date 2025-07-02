@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      th:replace="~{layout :: html(~{::section})}">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="background: linear-gradient(120deg, #E9F1FA 60%, #00ABE4 100%); min-height: 100vh;">
+<section class="container-fluid py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="color:var(--primary-color);font-weight:700;">
+            <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
+        </h2>
+        <div class="d-flex gap-2">
+            <a th:href="@{/dashboard/reports}" class="btn btn-outline-primary px-3 py-2 rounded-pill">
+                <i class="fas fa-file-alt me-1"></i> Reports
+            </a>
+            <span class="badge bg-light text-dark px-3 py-2" th:text="'Last Updated: ' + ${lastUpdated}"></span>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title opacity-75">Total Users</h6>
+                            <h2 class="mb-0" th:text="${totalUsers}">0</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title opacity-75">Total Products</h6>
+                            <h2 class="mb-0" th:text="${totalProducts}">0</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-box fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title opacity-75">Orders This Month</h6>
+                            <h2 class="mb-0" th:text="${totalOrdersThisMonth}">0</h2>
+                            <small class="opacity-75" th:text="'(' + ${totalOrdersThisWeek} + ' this week)'">0</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title opacity-75">Monthly Revenue</h6>
+                            <h2 class="mb-0" th:text="'$' + ${monthlyRevenue}">$0</h2>
+                            <small class="opacity-75" th:text="'($' + ${weeklyRevenue} + ' this week)'">$0</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Order Status Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Order Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="orderStatusChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-chart-line text-primary me-2"></i>Monthly Sales - <span th:text="${currentYear}"></span></h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyRevenueChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Popular Products -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-star text-primary me-2"></i>Most Popular Products</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${popularProducts == null || popularProducts.empty}" class="text-center text-muted">
+                        <i class="fas fa-box-open fa-2x mb-2"></i><br>No sales data available
+                    </div>
+                    <div th:each="product, iterStat : ${popularProducts}" th:if="${iterStat.index < 5 && product != null && product[0] != null}" class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div>
+                            <strong th:text="${product[0] ?: 'Unknown Product'}">Product Name</strong><br>
+                            <small class="text-muted">Popular item</small>
+                        </div>
+                        <span class="badge bg-primary" th:text="${product[1] ?: 0} + ' sold'">0 sold</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Revenue Products -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-primary me-2"></i>Top Revenue Products</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${topRevenueProducts == null || topRevenueProducts.empty}" class="text-center text-muted">
+                        <i class="fas fa-box-open fa-2x mb-2"></i><br>No revenue data available
+                    </div>
+                    <div th:each="product, iterStat : ${topRevenueProducts}" th:if="${iterStat.index < 5 && product != null && product[0] != null}" class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div>
+                            <strong th:text="${product[0] ?: 'Unknown Product'}">Product Name</strong><br>
+                            <small class="text-muted">High revenue item</small>
+                        </div>
+                        <span class="badge bg-success" th:text="'$' + ${product[1] ?: 0}">$0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Statistics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-tags text-primary me-2"></i>Categories Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div th:each="category, iterStat : ${categoryStats}" th:if="${iterStat.index < 8}" class="col-md-3 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 th:text="${category[0]}">Category</h6>
+                                    <span class="badge bg-info" th:text="${category[1]} + ' products'">0 products</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script th:inline="javascript">
+    // Order Status Chart - Add null safety
+    const orderStatusData = /*[[${orderStatusCounts}]]*/ [];
+    const statusLabels = orderStatusData && orderStatusData.length > 0 ? orderStatusData.map(item => item[0]) : [];
+    const statusCounts = orderStatusData && orderStatusData.length > 0 ? orderStatusData.map(item => item[1]) : [];
+
+    if (statusLabels.length > 0) {
+        new Chart(document.getElementById('orderStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusCounts,
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    } else {
+        // Show no data message
+        document.getElementById('orderStatusChart').getContext('2d').fillText('No data available', 10, 50);
+    }
+
+    // Monthly Revenue Chart - Add null safety
+    const monthlyData = /*[[${monthlyStats}]]*/ [];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const orderCounts = new Array(12).fill(0);
+    const revenues = new Array(12).fill(0);
+
+    if (monthlyData && monthlyData.length > 0) {
+        monthlyData.forEach(item => {
+            if (item && item.length >= 3) {
+                const monthIndex = item[0] - 1;
+                if (monthIndex >= 0 && monthIndex < 12) {
+                    orderCounts[monthIndex] = item[1] || 0;
+                    revenues[monthIndex] = item[2] || 0;
+                }
+            }
+        });
+    }
+
+    new Chart(document.getElementById('monthlyRevenueChart'), {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Revenue ($)',
+                data: revenues,
+                borderColor: '#36A2EB',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.4
+            }, {
+                label: 'Orders',
+                data: orderCounts,
+                borderColor: '#FF6384',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                tension: 0.4,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                }
+            }
+        }
+    });
+
+    // Reinitialize Bootstrap dropdowns after Chart.js finishes loading
+    // This fixes the issue where dropdowns stop working on the dashboard page
+    setTimeout(function() {
+        console.log('Dashboard loaded, dropdowns should work normally');
+    }, 200);
+</script>
+</body>
+</html>

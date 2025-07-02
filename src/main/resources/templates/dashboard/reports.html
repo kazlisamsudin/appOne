@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      th:replace="~{layout :: html(~{::section})}">
+<body style="background: linear-gradient(120deg, #E9F1FA 60%, #00ABE4 100%); min-height: 100vh;">
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="color:var(--primary-color);font-weight:700;">
+            <i class="fas fa-file-alt me-2"></i>Business Reports
+        </h2>
+        <a th:href="@{/dashboard}" class="btn btn-outline-primary px-3 py-2 rounded-pill">
+            <i class="fas fa-chart-line me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Report Filters -->
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 1rem;">
+        <div class="card-body">
+            <form th:action="@{/dashboard/reports}" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Report Type</label>
+                    <select class="form-select" name="reportType" style="border-radius: 2rem;">
+                        <option value="sales" th:selected="${reportType == 'sales'}">Sales Report</option>
+                        <option value="orders" th:selected="${reportType == 'orders'}">Order Analysis</option>
+                        <option value="revenue" th:selected="${reportType == 'revenue'}">Revenue Report</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Time Period</label>
+                    <select class="form-select" name="period" style="border-radius: 2rem;">
+                        <option value="week" th:selected="${period == 'week'}">Last 7 Days</option>
+                        <option value="month" th:selected="${period == 'month'}">This Month</option>
+                        <option value="quarter" th:selected="${period == 'quarter'}">Last 3 Months</option>
+                        <option value="year" th:selected="${period == 'year'}">Last Year</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100" style="border-radius: 2rem;">
+                        <i class="fas fa-sync-alt me-1"></i> Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white text-center">
+                    <h3 class="mb-1" th:text="${totalOrders}">0</h3>
+                    <p class="mb-0 opacity-75">Total Orders</p>
+                    <small th:text="${periodLabel}">Period</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body text-white text-center">
+                    <h3 class="mb-1" th:text="'$' + ${totalRevenue}">$0</h3>
+                    <p class="mb-0 opacity-75">Total Revenue</p>
+                    <small th:text="${periodLabel}">Period</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 1rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white text-center">
+                    <h3 class="mb-1" th:text="${totalRevenue > 0 && totalOrders > 0 ? '$' + #numbers.formatDecimal(totalRevenue / totalOrders, 1, 2) : '$0.00'}">$0</h3>
+                    <p class="mb-0 opacity-75">Average Order Value</p>
+                    <small th:text="${periodLabel}">Period</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Details -->
+    <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar text-primary me-2"></i>
+                    <span th:text="${reportType == 'sales' ? 'Sales Analysis' : reportType == 'orders' ? 'Order Analysis' : 'Revenue Breakdown'}">Report Details</span>
+                </h5>
+                <div>
+                    <span class="badge bg-light text-dark" th:text="'Period: ' + ${startDate} + ' - ' + ${endDate}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Order Status Breakdown -->
+            <div class="row">
+                <div class="col-12">
+                    <h6 class="text-primary mb-3"><i class="fas fa-tasks me-2"></i>Order Status Breakdown</h6>
+                    <div class="row">
+                        <div th:each="statusData : ${orderStatusCounts}" class="col-md-2 mb-3">
+                            <div class="card bg-light text-center">
+                                <div class="card-body">
+                                    <h5 th:text="${statusData[1]}">0</h5>
+                                    <small th:text="${statusData[0]}">Status</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h6 class="text-primary mb-3"><i class="fas fa-lightbulb me-2"></i>Key Insights</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="alert alert-info" role="alert">
+                                <h6 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Performance Summary</h6>
+                                <p class="mb-0">
+                                    During <strong th:text="${periodLabel}"></strong>, your business processed
+                                    <strong th:text="${totalOrders}"></strong> orders with a total revenue of
+                                    <strong th:text="'$' + ${totalRevenue}"></strong>.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-success" role="alert">
+                                <h6 class="alert-heading"><i class="fas fa-chart-line me-2"></i>Growth Indicator</h6>
+                                <p class="mb-0">
+                                    The average order value for this period is
+                                    <strong th:text="${totalRevenue > 0 && totalOrders > 0 ? '$' + #numbers.formatDecimal(totalRevenue / totalOrders, 1, 2) : '$0.00'}"></strong>,
+                                    showing customer purchasing patterns.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                        <div>
+                            <h6 class="mb-1">Export Report</h6>
+                            <small class="text-muted">Download this report in various formats</small>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-file-excel me-1"></i> Excel
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-file-csv me-1"></i> CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

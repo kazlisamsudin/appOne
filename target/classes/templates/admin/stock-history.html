@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      th:replace="~{layout :: html(~{::section})}">
+<body style="background: linear-gradient(120deg, #E9F1FA 60%, #00ABE4 100%); min-height: 100vh;">
+<section class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="color:var(--primary-color);font-weight:700;">
+            <i class="fas fa-history me-2"></i>Stock Management & Audit Trail
+        </h2>
+        <div>
+            <a th:href="@{/dashboard}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+            </a>
+            <a th:href="@{/products/list}" class="btn btn-outline-primary">
+                <i class="fas fa-box me-1"></i>Manage Products
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-exchange-alt fa-2x mb-2"></i>
+                    <h4 th:text="${stockHistoryPage.totalElements}">0</h4>
+                    <small>Total Stock Changes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 1rem; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-calendar-day fa-2x mb-2"></i>
+                    <h4 th:text="${#temporals.format(#temporals.createNow(), 'dd MMM')}">Today</h4>
+                    <small>Current Date</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 1rem; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-box fa-2x mb-2"></i>
+                    <h4>Active</h4>
+                    <small>Tracking Status</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="border-radius: 1rem; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-shield-check fa-2x mb-2"></i>
+                    <h4>Secure</h4>
+                    <small>Audit Trail</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock History Table -->
+    <div class="card shadow-lg border-0" style="border-radius: 1.5rem;">
+        <div class="card-header bg-light" style="border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem;">
+            <h5 class="mb-0">
+                <i class="fas fa-clipboard-list text-primary me-2"></i>
+                All Stock Changes
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${stockHistoryPage.content.empty}" class="text-center py-5">
+                <i class="fas fa-clipboard-list fa-5x text-muted mb-3"></i>
+                <h5 class="text-muted">No Stock Changes Yet</h5>
+                <p class="text-muted">Stock changes will appear here when they occur</p>
+            </div>
+
+            <div th:if="${!stockHistoryPage.content.empty}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class="fas fa-box me-1"></i>Product</th>
+                            <th><i class="fas fa-calendar me-1"></i>Date & Time</th>
+                            <th><i class="fas fa-exchange-alt me-1"></i>Stock Change</th>
+                            <th><i class="fas fa-tag me-1"></i>Change Type</th>
+                            <th><i class="fas fa-comment me-1"></i>Reason</th>
+                            <th><i class="fas fa-user me-1"></i>Changed By</th>
+                            <th><i class="fas fa-receipt me-1"></i>Order</th>
+                            <th><i class="fas fa-eye me-1"></i>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="history : ${stockHistoryPage.content}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <strong th:text="${history.product?.name ?: 'Unknown Product'}">Product Name</strong><br>
+                                        <small class="text-muted">ID: #<span th:text="${history.product?.id ?: 'N/A'}">0</span></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small th:text="${#temporals.format(history.changeDate, 'dd MMM yyyy')}">Date</small><br>
+                                <small class="text-muted" th:text="${#temporals.format(history.changeDate, 'HH:mm:ss')}">Time</small>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2" th:text="${history.previousQuantity} + ' ? ' + ${history.newQuantity}">0 ? 0</span>
+                                    <span th:if="${history.quantityChange > 0}"
+                                          class="badge bg-success"
+                                          th:text="'+' + ${history.quantityChange}">+0</span>
+                                    <span th:if="${history.quantityChange < 0}"
+                                          class="badge bg-danger"
+                                          th:text="${history.quantityChange}">-0</span>
+                                    <span th:if="${history.quantityChange == 0}"
+                                          class="badge bg-secondary">0</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:switch="${history.changeType?.name()}">
+                                    <span th:case="'MANUAL_ADJUSTMENT'" class="badge bg-warning">
+                                        <i class="fas fa-edit me-1"></i>Manual
+                                    </span>
+                                    <span th:case="'ORDER_PURCHASE'" class="badge bg-info">
+                                        <i class="fas fa-shopping-cart me-1"></i>Order
+                                    </span>
+                                    <span th:case="'ORDER_CANCELLATION'" class="badge bg-secondary">
+                                        <i class="fas fa-times me-1"></i>Cancelled
+                                    </span>
+                                    <span th:case="'INVENTORY_RESTOCK'" class="badge bg-success">
+                                        <i class="fas fa-plus me-1"></i>Restock
+                                    </span>
+                                    <span th:case="'DAMAGE_LOSS'" class="badge bg-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Loss
+                                    </span>
+                                    <span th:case="'RETURN_REFUND'" class="badge bg-primary">
+                                        <i class="fas fa-undo me-1"></i>Return
+                                    </span>
+                                    <span th:case="*" class="badge bg-light text-dark">Unknown</span>
+                                </span>
+                            </td>
+                            <td>
+                                <small th:text="${history.reason ?: 'No reason provided'}" class="text-muted">Reason</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark" th:text="${history.changedBy ?: 'system'}">User</span>
+                            </td>
+                            <td>
+                                <a th:if="${history.orderId != null}"
+                                   th:href="@{/orders/view/{id}(id=${history.orderId})}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    #<span th:text="${history.orderId}">Order ID</span>
+                                </a>
+                                <span th:if="${history.orderId == null}" class="text-muted">-</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/products/view/{id}(id=${history.product?.id})}"
+                                   class="btn btn-sm btn-outline-secondary"
+                                   title="View Product">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${stockHistoryPage.totalPages > 1}" class="mt-4" aria-label="Stock history pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${!stockHistoryPage.hasPrevious()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/stock/history(page=${stockHistoryPage.number - 1},size=${pageSize})}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+
+            <li th:each="pageNum : ${#numbers.sequence(0, stockHistoryPage.totalPages - 1)}"
+                class="page-item" th:classappend="${pageNum == stockHistoryPage.number} ? 'active'">
+                <a class="page-link" th:href="@{/admin/stock/history(page=${pageNum},size=${pageSize})}" th:text="${pageNum + 1}">1</a>
+            </li>
+
+            <li class="page-item" th:classappend="${!stockHistoryPage.hasNext()} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/stock/history(page=${stockHistoryPage.number + 1},size=${pageSize})}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</section>
+</body>
+</html>

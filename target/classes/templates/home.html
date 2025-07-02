@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      th:replace="~{layout :: html(~{::section})}">
+<body style="background: linear-gradient(135deg, #E9F1FA 0%, #00ABE4 100%); min-height: 100vh;">
+<section>
+    <!-- Hero Section -->
+    <div class="hero-section position-relative overflow-hidden py-5" style="background: linear-gradient(135deg, rgba(0,171,228,0.95) 0%, rgba(67,97,238,0.9) 100%);">
+        <div class="container">
+            <div class="row align-items-center min-vh-75">
+                <div class="col-lg-6">
+                    <div class="hero-content text-white px-4 px-lg-5 ps-lg-4">
+                        <h1 class="display-2 fw-bold mb-4">
+                            Welcome to <span class="text-warning">MyStore</span>
+                        </h1>
+                        <p class="lead fs-4 mb-4 pe-lg-5" style="opacity: 0.95;">
+                            Your modern e-commerce platform with secure authentication,
+                            inventory management, and seamless shopping experience.
+                        </p>
+
+                        <div class="hero-buttons mb-4">
+                            <div sec:authorize="!isAuthenticated()" class="d-flex flex-wrap gap-3">
+                                <a class="btn btn-warning btn-lg px-5 py-3 rounded-pill fw-semibold" th:href="@{/register}">
+                                    <i class="fas fa-user-plus me-2"></i>Get Started
+                                </a>
+                                <a class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-semibold" th:href="@{/products/list}">
+                                    <i class="fas fa-store me-2"></i>Browse Products
+                                </a>
+                            </div>
+                            <div sec:authorize="isAuthenticated()" class="d-flex flex-wrap gap-3">
+                                <a class="btn btn-warning btn-lg px-5 py-3 rounded-pill fw-semibold" th:href="@{/products/list}">
+                                    <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+                                </a>
+                                <a class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-semibold" th:href="@{/orders/my-orders}">
+                                    <i class="fas fa-history me-2"></i>My Orders
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center text-white-50">
+                            <div class="stars me-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <span>Trusted by thousands of users</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 text-center">
+                    <div class="hero-image px-3 px-lg-4">
+                        <div class="dashboard-preview bg-white shadow-lg p-5 mx-auto" style="max-width: 400px; border-radius: 2rem;">
+                            <div class="text-center">
+                                <div class="mb-4">
+                                    <i class="fas fa-shopping-cart display-1 text-primary"></i>
+                                </div>
+                                <h4 class="text-primary mb-4">E-Commerce Platform</h4>
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light text-center" style="border-radius: 1rem;">
+                                            <div class="h5 text-success mb-0">1000+</div>
+                                            <small class="text-muted">Products</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light text-center" style="border-radius: 1rem;">
+                                            <div class="h5 text-warning mb-0">500+</div>
+                                            <small class="text-muted">Users</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="fw-bold mb-3" style="color: var(--primary-color);">Platform Features</h2>
+                <p class="text-muted">Everything you need for your online business</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold">Secure Platform</h5>
+                        <p class="text-muted">Advanced security with user authentication and role-based access control.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-boxes fa-3x text-success"></i>
+                        </div>
+                        <h5 class="fw-bold">Inventory Management</h5>
+                        <p class="text-muted">Real-time stock tracking and automated inventory updates.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-shopping-cart fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="fw-bold">Order Management</h5>
+                        <p class="text-muted">Complete order processing with status tracking and notifications.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.min-vh-75 { min-height: 75vh; }
+
+.hero-buttons .btn {
+    transition: all 0.3s ease;
+}
+
+.hero-buttons .btn:hover {
+    transform: translateY(-2px);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-preview {
+    transition: all 0.3s ease;
+}
+
+.dashboard-preview:hover {
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    .display-2 {
+        font-size: 2.5rem !important;
+    }
+}
+</style>
+</body>
+</html>

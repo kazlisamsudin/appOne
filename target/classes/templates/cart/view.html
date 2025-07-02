@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+      th:replace="~{layout :: html(~{::section})}">
+<body>
+<section class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Flash Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${successMessage}">Success message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${errorMessage}">Error message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-shopping-cart me-2"></i>Your Shopping Cart</h4>
+                </div>
+                <div class="card-body">
+                    <div th:if="${cart == null || #lists.isEmpty(cart.items)}" class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-5x text-muted mb-3"></i>
+                        <h5 class="text-muted">Your cart is empty</h5>
+                        <p class="text-muted">Add some products to get started!</p>
+                        <a th:href="@{/products/list}" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Continue Shopping
+                        </a>
+                    </div>
+
+                    <div th:if="${cart != null && !#lists.isEmpty(cart.items)}">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Subtotal</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="item : ${cart.items}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0" th:text="${item.product?.name ?: 'Unknown Product'}">Product Name</h6>
+                                                    <small class="text-muted" th:text="${item.product?.description ?: ''}">Product Description</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-success">$<span th:text="${item.price ?: 0}">0.00</span></span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${item.quantity ?: 0}">1</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold">$<span th:text="${item.subtotal ?: 0}">0.00</span></span>
+                                        </td>
+                                        <td>
+                                            <form th:action="@{/cart/remove/{itemId}(itemId=${item.id})}" method="post" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Remove this item from cart?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <a th:href="@{/products/list}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>Continue Shopping
+                                </a>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5>Order Summary</h5>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Total Items:</span>
+                                            <span th:text="${cart.totalItems ?: 0}">0</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Total Amount:</strong>
+                                            <strong class="text-success">$<span th:text="${cart.totalAmount ?: 0}">0.00</span></strong>
+                                        </div>
+                                        <hr>
+                                        <form th:action="@{/cart/checkout}" method="post">
+                                            <button type="submit" class="btn btn-success w-100">
+                                                <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
