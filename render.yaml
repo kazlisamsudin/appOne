@@ -1,9 +1,7 @@
 services:
   - type: web
     name: myapp
-    env: java
-    buildCommand: "./build.sh"
-    startCommand: "./start.sh"
+    env: docker
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
